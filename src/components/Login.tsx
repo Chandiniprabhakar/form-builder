@@ -1,11 +1,16 @@
 import { useState } from "react";
+import { FormStructure } from "../App";
 
-export default function Login({ onSuccess }) {
+interface LoginProps {
+  onSuccess: (form: FormStructure) => void;
+}
+
+export default function Login({ onSuccess }: LoginProps) {
   const [rollNumber, setRollNumber] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleRegister = async (e) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -32,7 +37,7 @@ export default function Login({ onSuccess }) {
     }
   };
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -56,45 +61,35 @@ export default function Login({ onSuccess }) {
 
   return (
     <div>
-      <div>
-        <h2>Dynamic Forms</h2>
-        <p> Enter the following details </p>
-
-        <form className="space-y-6">
-          <div>
-            <input
-              type="text"
-              placeholder="Roll Number"
-              value={rollNumber}
-              onChange={(e) => setRollNumber(e.target.value)}
-              required
-            />
-          </div>
-
-          <div>
-            <input
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-
-          <div>
-            <button onClick={handleRegister} disabled={loading}>
-              Register
-            </button>
-
-            <button
-              onClick={handleLogin}
-              disabled={loading || !rollNumber || !name}
-            >
-              Login
-            </button>
-          </div>
-        </form>
-      </div>
+      <h2>Dynamic Forms</h2>
+      <p>Enter the following details</p>
+      <form className="space-y-6">
+        <input
+          type="text"
+          placeholder="Roll Number"
+          value={rollNumber}
+          onChange={(e) => setRollNumber(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+        <div>
+          <button onClick={handleRegister} disabled={loading}>
+            Register
+          </button>
+          <button
+            onClick={handleLogin}
+            disabled={loading || !rollNumber || !name}
+          >
+            Login
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

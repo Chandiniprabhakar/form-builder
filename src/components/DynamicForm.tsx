@@ -1,42 +1,48 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { FormStructure, FormField } from "../App";
 
-export default function DynamicForm({ formStructure }) {
+interface DynamicFormProps {
+  formStructure: FormStructure;
+}
+
+export default function DynamicForm({ formStructure }: DynamicFormProps) {
   const sections = formStructure.sections;
   const [currentSection, setCurrentSection] = useState(0);
-  const [formData, setFormData] = useState({});
-  const [errors, setErrors] = useState({});
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const validateField = (field, value) => {
-    let error = "";
-
+  const validateField = (field: FormField, value: any): string => {
     if (field.required && !value) {
-      error = field.validation?.message || "This field is required";
+      return field.validation?.message || "This field is required";
     } else if (field.minLength && value.length < field.minLength) {
-      error = `Minimum length is ${field.minLength}`;
+      return `Minimum length is ${field.minLength}`;
     } else if (field.maxLength && value.length > field.maxLength) {
-      error = `Maximum length is ${field.maxLength}`;
+      return `Maximum length is ${field.maxLength}`;
     }
-
-    return error;
+    return "";
   };
 
   const validateSection = () => {
-    const newErrors = {};
+    const newErrors: Record<string, string> = {};
     sections[currentSection].fields.forEach((field) => {
       const value = formData[field.fieldId] || "";
       const error = validateField(field, value);
-      if (error) {
-        newErrors[field.fieldId] = error;
-      }
+      if (error) newErrors[field.fieldId] = error;
     });
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e, field) => {
-    const value = field.type === "checkbox" ? e.target.checked : e.target.value;
-
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+    field: FormField
+  ) => {
+    const value =
+      field.type === "checkbox"
+        ? (e.target as HTMLInputElement).checked
+        : e.target.value;
     setFormData({ ...formData, [field.fieldId]: value });
 
     if (errors[field.fieldId]) {
@@ -44,20 +50,15 @@ export default function DynamicForm({ formStructure }) {
     }
   };
 
-  const handleOptionChange = (field, optionValue) => {
-    setFormData({ ...formData, [field.fieldId]: optionValue });
+  const handleOptionChange = (field: FormField, value: string) => {
+    setFormData({ ...formData, [field.fieldId]: value });
     if (errors[field.fieldId]) {
-      setErrors({
-        ...errors,
-        [field.fieldId]: validateField(field, optionValue),
-      });
+      setErrors({ ...errors, [field.fieldId]: validateField(field, value) });
     }
   };
 
   const handleNext = () => {
-    if (validateSection()) {
-      setCurrentSection(currentSection + 1);
-    }
+    if (validateSection()) setCurrentSection(currentSection + 1);
   };
 
   const handlePrev = () => {
@@ -71,12 +72,12 @@ export default function DynamicForm({ formStructure }) {
     }
   };
 
-  const renderField = (field) => {
+  const renderField = (field: FormField) => {
     const commonProps = {
       id: field.fieldId,
       "data-testid": field.dataTestId,
       value: formData[field.fieldId] || "",
-      onChange: (e) => handleChange(e, field),
+      onChange: (e: any) => handleChange(e, field),
       placeholder: field.placeholder || "",
       className: "border p-2 w-full",
     };
